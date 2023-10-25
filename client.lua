@@ -1,7 +1,8 @@
 local ESX = exports['es_extended']:getSharedObject()
 local carryPackage = nil
 
-exports.qtarget:AddBoxZone("Recycling", vector3(-350.71, -1553.79, 24.27), 6.2, 7.0, {
+
+	exports.qtarget:AddBoxZone("Recycling", vector3(-350.71, -1553.79, 24.27), 6.2, 7.0, {
 	name="Recycling",
 	heading=359,
 	debugPoly=false,
@@ -15,16 +16,21 @@ exports.qtarget:AddBoxZone("Recycling", vector3(-350.71, -1553.79, 24.27), 6.2, 
 				label = "Einpacken",
 			},
 		},
-		distance = 3.5
+	distance = 3.5
 })
+
 
 RegisterNetEvent('esx_recycling:test')
 AddEventHandler('esx_recycling:test', function()
 	if not carryPackage then
 		local ped = PlayerPedId()
-		exports['an_progBar']:run(7,'Müll einpacken','#E14127') --exports['progressBars']:startUI(7000, "Müll einpacken")
+		exports['an_progBar']:run(7,'Müll einpacken','#E14127') 			-- DIE ZAHL NEBEN "RUN" IST DIE DAUER DER PROGBAR. SOLLTET IHR DIESE ÄNDERN, VERGESST NICHT AUCH DIE ZEIT BEI.....
     	TaskStartScenarioInPlace(ped, "PROP_HUMAN_BUM_BIN", 0, 1)
-    	Citizen.Wait(7000)
+    	Citizen.Wait(7000)													-- CITIZEN.WAIT GLEICH ZU SETZEN. 7000 = 7 SEKUNDEN
+		exports["skeexsNotify"]:TriggerNotification({
+			['type'] = "info",
+			['message'] = 'Lege das Paket in den roten Container hinter dir.'
+		})
     	ClearPedTasks(ped)
 		local pos = GetEntityCoords(PlayerPedId(), true)
 		RequestAnimDict('anim@heists@box_carry@')
@@ -39,7 +45,7 @@ AddEventHandler('esx_recycling:test', function()
 		local object = CreateObject('prop_cs_cardbox_01', pos.x, pos.y, pos.z, true, true, true)
 		AttachEntityToEntity(object, PlayerPedId(), GetPedBoneIndex(PlayerPedId(), 57005), 0.05, 0.1, -0.3, 300.0, 250.0, 20.0, true, true, false, true, 1, true)
 		carryPackage = object
-		TriggerEvent('esx_recycling:box')
+		TriggerEvent('esx_recycling:marker')
 	else 
 		exports["skeexsNotify"]:TriggerNotification({
 			['type'] = "info",
@@ -48,32 +54,33 @@ AddEventHandler('esx_recycling:test', function()
 	end
 end)
 
-RegisterNetEvent('esx_recycling:box')
-AddEventHandler('esx_recycling:box', function()
-	local pos = {x = -340.72, y = -1567.75, z = 24.93, rot = 244.7} -- rot = heading
+RegisterNetEvent('esx_recycling:marker')
+AddEventHandler('esx_recycling:marker', function()
+	local pos = {x = -340.72, y = -1567.75, z = 24.93, rot = 244.7}
 	local scale = 1.0
 
-	while carryPackage do  
-		DrawMarker(1, pos.x, pos.y, pos.z, 0.0, 0.0, 0.0, 0.0, 180.0, 0.0, scale, scale, scale, 255, 0, 0, 100, true, true, 2, nil, nil, false) -- Bei pos.z evt anpassen.  0, 128, 255
+	while carryPackage do
+		DrawMarker(1, pos.x, pos.y, pos.z, 0.0, 0.0, 0.0, 0.0, 180.0, 0.0, scale, scale, scale, 255, 0, 0, 100, true, true, 2, nil, nil, false)
 		Citizen.Wait(1)
-		exports.qtarget:AddBoxZone("Box", vector3(-340.02, -1568.12, 24.23), 0.6, 2.6, {
-			name="Box",
-			heading=66,
-			debugPoly=false,
-			minZ=25,
-			maxZ=27,
-			}, {
-				options = {
-					{
-						event = "esx_recycling:einlagern",
-						icon = "fas fa-sign-in-alt",
-						label = "Einlagern",
-					},
-				},
-				distance = 3.5
-		})
 	end
 end)
+
+exports.qtarget:AddBoxZone("Box", vector3(-340.02, -1568.12, 24.23), 0.6, 2.6, {
+	name="Box",
+	heading=66,
+	debugPoly=false,
+	minZ=25,
+	maxZ=27,
+	}, {
+		options = {
+			{
+				event = "esx_recycling:einlagern",
+				icon = "fas fa-sign-in-alt",
+				label = "Einlagern",
+			},
+		},
+		distance = 3.5
+})
 
 RegisterNetEvent('esx_recycling:einlagern')
 AddEventHandler('esx_recycling:einlagern', function()
@@ -84,14 +91,14 @@ AddEventHandler('esx_recycling:einlagern', function()
 		  })
 	else
 		local ped = PlayerPedId()
-		exports['an_progBar']:run(7,'Müll auspacken.','#E14127') --exports['progressBars']:startUI(7000, "Müll auspacken.")
+		exports['an_progBar']:run(7,'Müll auspacken.','#E14127')			-- DIE ZAHL NEBEN "RUN" IST DIE DAUER DER PROGBAR. SOLLTET IHR DIESE ÄNDERN, VERGESST NICHT AUCH DIE ZEIT BEI.....
 		DetachEntity(carryPackage, true, true)
   		DeleteObject(carryPackage)
 		ClearPedTasks(ped)
+		carryPackage = nil
 		TaskStartScenarioInPlace(ped, "PROP_HUMAN_BUM_BIN", 0, 1)
-    	Citizen.Wait(7000)
+    	Citizen.Wait(7000)													-- CITIZEN.WAIT GLEICH ZU SETZEN. 7000 = 7 SEKUNDEN
     	ClearPedTasks(ped)
-  		carryPackage = nil
 		TriggerServerEvent('esx_recycling:reward')
 		exports["skeexsNotify"]:TriggerNotification({
 			['type'] = "success",
