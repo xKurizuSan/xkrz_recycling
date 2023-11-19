@@ -39,3 +39,10 @@
 	stack = true,
 	close = true,
 },
+
+["iron"] = {
+	label = "Iron",
+	weight = 1,
+	stack = true,
+	close = true,
+},
