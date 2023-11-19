@@ -32,3 +32,10 @@
 	stack = true,
 	close = true,
 },
+
+["copper"] = {
+	label = "Copper",
+	weight = 1,
+	stack = true,
+	close = true,
+},
