@@ -1,4 +1,11 @@
-local ESX = exports['es_extended']:getSharedObject()
+Citizen.CreateThread(function()
+    if Config.Framework == 'ESX' then 
+        ESX = exports['es_extended']:getSharedObject()
+    elseif Config.Framework == 'QB' then  
+        QBCore = exports['qb-core']:GetCoreObject()
+    end
+end)
+
 local carryPackage = false
 
 Citizen.CreateThread(function()
@@ -230,7 +237,11 @@ function einraeumen()
     	})
 	end 
     ClearPedTasks(ped)
-	TriggerServerEvent('xkrz_recycling:reward')
+	if Config.Framework == 'ESX' then
+		TriggerServerEvent('xkrz_recycling:reward')
+	elseif Config.Framework == 'QB' then
+		TriggerServerEvent('xkrz_recycling:reward:qb')
+	end
 	lib.notify({
 		title = 'Success',
 		description = 'Du hast das Paket erfolgreich abgeliefert.',
